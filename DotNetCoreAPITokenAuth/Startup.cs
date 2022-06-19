@@ -1,6 +1,7 @@
 using DotNetCoreAPITokenAuth.Authontications;
 using DotNetCoreAPITokenAuth.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -41,7 +42,25 @@ namespace DotNetCoreAPITokenAuth
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-             
+
+            //Default policy publisher
+            /* If you don't want to set the scheme ([Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)])
+               in every controller then configure it in the Startup.cs */
+            services.AddAuthorization(options =>
+            {
+                var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(
+                    JwtBearerDefaults.AuthenticationScheme);
+
+                defaultAuthorizationPolicyBuilder =
+                    defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
+
+                options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+            });
+
+
+
+
+
             // Adding Authontication    
             services.AddAuthentication(option => {
                 option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

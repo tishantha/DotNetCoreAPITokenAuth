@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace DotNetCoreAPITokenAuth.Controllers
 {
+    /*
+        We added default policy publisher to startup.cs, so don't need to add the scheme every controller.
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)].
+        Just use [Authorize]
+    */
     [Authorize]
     [ApiController]
     [Route("[controller]")]
