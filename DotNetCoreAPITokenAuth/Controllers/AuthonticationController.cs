@@ -32,7 +32,7 @@ namespace DotNetCoreAPITokenAuth.Controllers
 
         [HttpPost]
         [Route("Register")]
-        public async Task<IActionResult> Login([FromBody] RegisterModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             var userExist = await userManager.FindByNameAsync(model.UserName);
 
@@ -65,6 +65,8 @@ namespace DotNetCoreAPITokenAuth.Controllers
             return Ok(new Response { Status="Success",Massage="User Created Successfully!" });
         }
 
+
+
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -86,14 +88,17 @@ namespace DotNetCoreAPITokenAuth.Controllers
 
                 var authSigninKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
                 
-                /*JwtSecurityToken(
+
+                /*
+                 * JwtSecurityToken(
                  * string issuer = null, 
                  * string audience = null, 
                  * IEnumerable<Claim> claims = null, 
                  * DateTime? notBefore = null, 
                  * DateTime? expires = null, 
                  * SigningCredentials signingCredentials = null
-                 * );*/
+                 * );
+                 */
                 var token = new JwtSecurityToken(
                     issuer: _configuration["JWT:ValidIssuer"],
                     audience: _configuration["JWT:ValidAudience"],
@@ -109,6 +114,59 @@ namespace DotNetCoreAPITokenAuth.Controllers
             return Unauthorized();
         }
 
+
+
+        [HttpPost]
+        [Route("RegisterAdmin")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
+        {
+            var userExist = await userManager.FindByNameAsync(model.UserName);
+
+            if (userExist != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response
+                {
+                    Status = "Error",
+                    Massage = "The Username is already exists!"
+                });
+            }
+
+            ApplicationUser user = new ApplicationUser()
+            {
+                Email = model.Email,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = model.UserName
+            };
+
+            var result = await userManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response
+                {
+                    Status = "Error",
+                    Massage = "User creation error occured!"
+                });
+            }
+
+            if(!await roleManager.RoleExistsAsync(UserRole.Admin))
+            {
+                await roleManager.CreateAsync(new IdentityRole(UserRole.Admin));
+            }
+
+            if (!await roleManager.RoleExistsAsync(UserRole.User))
+            {
+                await roleManager.CreateAsync(new IdentityRole(UserRole.User));
+            }
+
+            if (await roleManager.RoleExistsAsync(UserRole.Admin))
+            {
+                await userManager.AddToRoleAsync(user,UserRole.Admin);
+            }
+
+
+            return Ok(new Response { Status = "Success", Massage = "User Created Successfully!" });
+        }
 
 
     }
