@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using DotNetCoreAPITokenAuth.Authontications;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,7 @@ namespace DotNetCoreAPITokenAuth.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)].
         Just use [Authorize]
     */
+    [Authorize(Roles = UserRole.Admin)]
     [Authorize]
     [ApiController]
     [Route("[controller]")]
